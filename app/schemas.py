@@ -23,6 +23,12 @@ class UserCreate(BaseModel):
     class Config:
         from_attributes = True
 
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+
+    class Config:
+        from_attributes = True
 
 
 
