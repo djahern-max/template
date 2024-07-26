@@ -1,0 +1,51 @@
+# Ignore virtual environment directories
+venv/
+env/
+.venv/
+
+# Ignore Python compiled files
+*.pyc
+__pycache__/
+
+# Ignore configuration files and sensitive information
+*.env
+*.ini
+*.cfg
+secrets.yaml
+secrets.json
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor configurations
+.idea/
+.vscode/
+*.swp
+
+# Ignore database files (if any are stored locally)
+*.sqlite3
+
+# Ignore pytest cache and other test files
+.pytest_cache/
+.tox/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+nosetests.xml
+test_results/
+junit-xml/
+
+# Ignore static files generated during builds
+staticfiles/
+media/
+
+# Ignore specific files
+database.sqlite3  # If you are using SQLite for development

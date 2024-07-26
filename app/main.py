@@ -1,8 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from . import models, database, schemas
+from app import models, database, schemas
 import logging
 from sqlalchemy.sql import text
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
@@ -70,11 +73,22 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    # Check if the email already exists
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
+    # Hash the user's password
+    hashed_password = pwd_context.hash(user.password)
+    user.password = hashed_password
+
+    # Create a new user
     new_user = models.User(**user.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
+
 
 
 
