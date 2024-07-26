@@ -17,7 +17,7 @@ def startup_event():
     # Check database connection
     try:
         db = database.SessionLocal()
-        db.execute(text("SELECT 1"))  # Explicitly declare SQL expression as text
+        db.execute(text("SELECT 1"))
         logger.info("Successfully connected to the database.")
     except Exception as e:
         logger.error("Database connection failed.")
@@ -49,8 +49,6 @@ def read_post(id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=404, detail="Post not found")
     return post
 
-from fastapi.responses import JSONResponse
-
 @app.delete("/posts/{id}", status_code=status.HTTP_200_OK)
 def delete_post(id: int, db: Session = Depends(database.get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
@@ -58,8 +56,7 @@ def delete_post(id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=404, detail="Post not found")
     db.delete(post)
     db.commit()
-    return JSONResponse(content={"message": "Post successfully deleted"})
-
+    return {"message": "Post successfully deleted"}
 
 @app.put("/posts/{id}", response_model=schemas.PostResponse)
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(database.get_db)):
@@ -70,6 +67,14 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     post_query.update(updated_post.dict())
     db.commit()
     return post
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserCreate)
+def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
 
 
