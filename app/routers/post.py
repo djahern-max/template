@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from app import models, schemas, database
 
 
-router = APIRouter()
+router = APIRouter(
+    tags=["Posts"],
+)
 
 @router.get("/", response_model=list[schemas.PostResponse])
 def read_posts(db: Session = Depends(database.get_db)):
