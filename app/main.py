@@ -1,93 +1,25 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from passlib.context import CryptContext
-from sqlalchemy.orm import Session
-from app import models, database, schemas
+from fastapi import FastAPI
+from app.routers import post, user
 import logging
-from sqlalchemy.sql import text
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-models.Base.metadata.create_all(bind=database.engine)
-
-@app.on_event("startup")
-def startup_event():
-    # Check database connection
-    try:
-        db = database.SessionLocal()
-        db.execute(text("SELECT 1"))
-        logger.info("Successfully connected to the database.")
-    except Exception as e:
-        logger.error("Database connection failed.")
-        logger.error(f"Error details: {e}")
-    finally:
-        db.close()
+app.include_router(post.router, prefix="/posts")
+app.include_router(user.router, prefix="/users")
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to my API!"}
 
-@app.get("/posts", response_model=list[schemas.PostResponse])
-def read_posts(db: Session = Depends(database.get_db)):
-    posts = db.query(models.Post).all()
-    return posts
+app.include_router(post.router, prefix="/posts")
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
-def create_post(post: schemas.PostCreate, db: Session = Depends(database.get_db)):
-    new_post = models.Post(**post.dict())
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
-    return new_post
+@app.on_event("startup")
+def startup_event():
+    logger.info("Application startup")
 
-@app.get("/posts/{id}", response_model=schemas.PostResponse)
-def read_post(id: int, db: Session = Depends(database.get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    return post
-
-@app.delete("/posts/{id}", status_code=status.HTTP_200_OK)
-def delete_post(id: int, db: Session = Depends(database.get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    db.delete(post)
-    db.commit()
-    return {"message": "Post successfully deleted"}
-
-@app.put("/posts/{id}", response_model=schemas.PostResponse)
-def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(database.get_db)):
-    post_query = db.query(models.Post).filter(models.Post.id == id)
-    post = post_query.first()
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    post_query.update(updated_post.dict())
-    db.commit()
-    return post
-
-@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
-def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    # Check if the email already exists
-    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-
-    # Hash the user's password
-    hashed_password = pwd_context.hash(user.password)
-    user.password = hashed_password
-
-    # Create a new user
-    new_user = models.User(**user.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
 
 
 

@@ -14,14 +14,11 @@ class PostResponse(PostBase):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
-
-    class Config:
-        from_attributes = True
 
 class UserOut(BaseModel):
     id: int
@@ -29,7 +26,7 @@ class UserOut(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 
