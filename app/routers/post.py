@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app import models, schemas, database
-
+from app import models, schemas, database, oauth2
 
 router = APIRouter(
     tags=["Posts"],
@@ -13,8 +12,9 @@ def read_posts(db: Session = Depends(database.get_db)):
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
-def create_post(post: schemas.PostCreate, db: Session = Depends(database.get_db)):
-    new_post = models.Post(**post.dict())
+def create_post(post: schemas.PostCreate, db: Session = Depends(database.get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+    # This line ensures that a user must be logged in to create a post
+    new_post = models.Post(**post.dict(), user_id=current_user.id)
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
