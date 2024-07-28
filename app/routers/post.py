@@ -28,10 +28,15 @@ def read_post(id: int, db: Session = Depends(database.get_db)):
     return post
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
-def delete_post(id: int, db: Session = Depends(database.get_db)):
+def delete_post(id: int, db: Session = Depends(database.get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Optional: Check if the current user is the owner of the post
+    if post.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to delete this post")
+    
     db.delete(post)
     db.commit()
     return {"message": "Post successfully deleted"}
