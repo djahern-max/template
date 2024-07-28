@@ -1,3 +1,4 @@
+# auth.py
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from app import database, schemas, models, utils
@@ -11,6 +12,8 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(database.ge
     if not user or not utils.verify_password(user_credentials.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
-    return {"token": 'example token'}
+    # For testing purposes, return the hashed password
+    return {"hashed_password": user.password}
+
     
 
