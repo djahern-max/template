@@ -12,7 +12,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 SECRET_KEY = "your-secret-key"  # Ensure this is secure and consistent
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
