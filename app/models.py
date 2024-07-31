@@ -11,7 +11,7 @@ class Post(Base):
     content = Column(String, index=True)
     published = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     
     # Optional: Define relationship to user
     owner = relationship("User", back_populates="posts")
@@ -23,7 +23,7 @@ class User(Base):
     password = Column(String, nullable=False)  # Ensure this matches the database schema
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'), nullable=False)
     
-    posts = relationship("Post", back_populates="owner")
+    posts = relationship("Post", back_populates="owner", cascade="all, delete")
 
 
 
