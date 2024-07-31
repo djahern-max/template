@@ -48,12 +48,7 @@ class User(BaseModel):
     class Config:
         orm_mode = True
 
-class PostOut(PostBase):
-    id: int
-    owner_id: int
 
-    class Config:
-        orm_mode = True
 
 
 
