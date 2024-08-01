@@ -7,12 +7,13 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app import database, models
 from sqlalchemy.orm import Session
+from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-SECRET_KEY = "your-secret-key"  # Ensure this is secure and consistent
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = settings.secret_key  
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,

@@ -2,6 +2,9 @@ from fastapi import FastAPI
 import logging
 from app.routers import post, user, auth
 from app.database import engine, Base
+from .config import settings
+
+print(settings.database_username)
 
 # Set up logging before application setup
 logging.basicConfig(level=logging.INFO)
