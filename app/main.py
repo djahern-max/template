@@ -20,7 +20,7 @@ app.include_router(user.router, prefix="/users", tags=["Users"])
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
-app.include_router(vote.router, prefix="/vote", tags=["Votes"])
+app.include_router(vote.router, tags=["Votes"])
 
 @app.get("/")
 def read_root():
