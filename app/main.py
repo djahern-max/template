@@ -3,14 +3,27 @@ import logging
 from app.routers import post, user, auth, vote
 from app.database import engine, Base
 from app.config import settings
+from fastapi.middleware.cors import CORSMiddleware
 
 print("Database Username:", settings.database_username)
+
+
 
 # Set up logging before application setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routers
 
