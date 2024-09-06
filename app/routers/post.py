@@ -2,16 +2,31 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app import models, schemas, database, oauth2
 from typing import Optional
+from sqlalchemy import func
+from typing import List
 
 router = APIRouter(
     tags=["Posts"],
 )
 
-@router.get("/", response_model=list[schemas.PostResponse])
-def read_posts(db: Session = Depends(database.get_db), current_user: schemas.User = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str]=""):
-    print(f"Received limit: {limit}")
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
-    return posts
+@router.get("/", response_model=List[schemas.PostOut])
+def read_posts(
+    db: Session = Depends(database.get_db),
+    current_user: schemas.User = Depends(oauth2.get_current_user),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = ""
+):
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes"))\
+        .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)\
+        .group_by(models.Post.id)\
+        .filter(models.Post.title.contains(search))\
+        .limit(limit)\
+        .offset(skip)\
+        .all()
+
+    return [schemas.PostOut(id=post.id, title=post.title, content=post.content, votes=votes) 
+            for post, votes in posts]
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_post(post: schemas.PostCreate, db: Session = Depends(database.get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):   
@@ -68,4 +83,12 @@ def update_post(
     post_query.update(updated_post.dict(), synchronize_session=False)
     db.commit()
     return post
+
+@router.get("/posts-with-votes", response_model=List[schemas.PostOut])
+def get_posts_with_votes(db: Session = Depends(database.get_db)):
+    results = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True
+    ).group_by(models.Post.id).all()
+    
+    return [{"post": post, "votes": votes} for post, votes in results]
 

@@ -58,6 +58,24 @@ class Vote(BaseModel):
     class Config:
         from_attributes = True
 
+class Post(BaseModel):
+    id: int
+    created_at: datetime
+    owner_id: int
+    owner: UserOut
+
+    class Config:
+        orm_mode = True
+
+class PostOut(BaseModel):
+    id: int
+    title: str
+    content: str
+    votes: int
+
+    class Config:
+        from_attributes = True
+
 
 
 
