@@ -9,26 +9,37 @@ from app.database import get_db
 # Database URL
 SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:Guitar0123!@localhost:5432/fastapi_test'
 
+def test_root(client):
+    res = client.get("/")
+    print(res.json().get('message'))
+    assert res.json().get('message') == "Welcome to ryze!"
+    assert res.status_code == 200
+
+
 # Create engine and session
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Override get_db to use the test database
-def override_get_db():
+@pytest.fixture
+def session():
+    models.Base.metadata.drop_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-app.dependency_overrides[get_db] = override_get_db
-
 # Create client fixture
 @pytest.fixture
-def client():
-    models.Base.metadata.create_all(bind=engine)  # Use models.Base instead of re-defining Base
+def client(session):
+    def override_get_db():
+        try:
+            yield session
+        finally:
+            session.close()
+    app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
-    models.Base.metadata.drop_all(bind=engine)
 
 # Test for creating user
 def test_create_user(client):
