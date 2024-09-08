@@ -50,20 +50,20 @@ def test_posts(test_user, session):
     posts_data = [{
         "title": "first title",
         "content": "first content",
-        "owner_id": test_user['id']
+        "user_id": test_user['id']  # Use user_id, which matches your Post model
     }, {
         "title": "2nd title",
         "content": "2nd content",
-        "owner_id": test_user['id']
+        "user_id": test_user['id']  # Use user_id
     },
-        {
+    {
         "title": "3rd title",
         "content": "3rd content",
-        "owner_id": test_user['id']
+        "user_id": test_user['id']  # Use user_id
     }, {
-        "title": "3rd title",
-        "content": "3rd content",
-        "owner_id": test_user['id']
+        "title": "4th title",
+        "content": "4th content",
+        "user_id": test_user['id']  # Use user_id
     }]
 
     def create_post_model(post):
@@ -73,9 +73,6 @@ def test_posts(test_user, session):
     posts = list(post_map)
 
     session.add_all(posts)
-    # session.add_all([models.Post(title="first title", content="first content", owner_id=test_user['id']),
-    #                 models.Post(title="2nd title", content="2nd content", owner_id=test_user['id']), models.Post(title="3rd title", content="3rd content", owner_id=test_user['id'])])
     session.commit()
 
-    posts = session.query(models.Post).all()
-    return posts
+    return session.query(models.Post).all()
