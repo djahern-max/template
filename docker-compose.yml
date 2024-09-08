@@ -1,0 +1,18 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    # Uncomment the following lines if you want to use an env_file instead of environment variables in the docker-compose file
+    # env_file:
+    #   - ./.env
+    environment:
+      DATABASE_HOSTNAME: localhost
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: Guitar0123
+      DATABASE_NAME: ryze
+      DATABASE_USERNAME: postgres
+      SECRET_KEY: 23165487
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 300
+      DATABASE_URL: "postgresql://postgres:Guitar0123@localhost:5432/ryze"
