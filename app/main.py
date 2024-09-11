@@ -8,14 +8,12 @@ from contextlib import asynccontextmanager
 
 print("Database Username:", settings.database_username)
 
-# Set up logging before application setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup")
-    # This line will create all tables that do not exist yet
     Base.metadata.create_all(bind=engine)
     yield
     logger.info("Application shutdown")

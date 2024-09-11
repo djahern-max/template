@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -5,9 +6,9 @@ import jwt
 from datetime import datetime, timedelta
 from app import database, models, utils, schemas, oauth2
 
-SECRET_KEY = "your_secret_key"  # Use a secure key from environment variables or a config file
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")  
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60)) 
 
 router = APIRouter(
     tags=["Authentication"]
@@ -22,9 +23,7 @@ def create_access_token(data: dict):
 
 @router.post('/login', response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
-    # Find user by email, using form_data.username as email
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
-
     if not user or not utils.verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -34,5 +33,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     
     access_token = oauth2.create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
     
 

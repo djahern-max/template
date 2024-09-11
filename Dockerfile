@@ -1,5 +1,5 @@
-# Use the python 3.12-slim image
-FROM python:3.12-slim
+# Stage 1: Build stage for dependencies
+FROM python:3.12-slim as builder
 
 # Set the working directory
 WORKDIR /user/src/app
@@ -19,13 +19,30 @@ RUN apt-get update && apt-get install -y \
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Copy requirements.txt to the container
-COPY requirements.txt ./
+COPY requirements.txt ./ 
 
-# Install Python dependencies from requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies in a virtual environment
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code to the working directory
+# Stage 2: Final stage
+FROM python:3.12-slim
+
+# Set the working directory
+WORKDIR /user/src/app
+
+# Copy the virtual environment from the build stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Ensure venv is active
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy the application code
 COPY . .
+
+# Create a non-root user
+RUN adduser --disabled-password myuser
+USER myuser
 
 # Command to run the FastAPI app using Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

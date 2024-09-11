@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt  # Consistently using jose
-from datetime import datetime, timedelta
 from typing import Optional
 from . import schemas
 from fastapi import Depends, HTTPException, status
@@ -47,12 +46,17 @@ def verify_access_token(token: str, credentials_exception):
     except JWTError:
         raise credentials_exception
 
+# Updated to reflect username instead of email
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
     token_data = verify_access_token(token, credentials_exception)
+    
+    # Updated from email to username
     user = db.query(models.User).filter(models.User.id == token_data.id).first()
+    
     if user is None:
         raise credentials_exception
     return user
+
 
 
     

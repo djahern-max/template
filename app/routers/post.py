@@ -31,7 +31,6 @@ def read_posts(
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_post(post: schemas.PostCreate, db: Session = Depends(database.get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):   
  
-    # Use model_dump() instead of dict() as per Pydantic v2.0
     new_post = models.Post(**post.model_dump(), user_id=current_user.id)
     db.add(new_post)
     db.commit()
@@ -50,8 +49,7 @@ def delete_post(id: int, db: Session = Depends(database.get_db), current_user: s
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    
-    # Optional: Check if the current user is the owner of the post
+
     if post.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to delete this post")
     
@@ -66,19 +64,16 @@ def update_post(
     db: Session = Depends(database.get_db), 
     current_user: schemas.User = Depends(oauth2.get_current_user)
 ):
-    # Retrieve the post to be updated
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
     
-    # Check if the post exists
+  
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     
-    # Ensure the current user is the owner of the post
     if post.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to update this post")
     
-    # Use model_dump() instead of dict() as per Pydantic v2.0
     post_query.update(updated_post.model_dump(), synchronize_session=False)
     db.commit()
     return post

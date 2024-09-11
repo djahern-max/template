@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   api:
     image: dahern/ryze
@@ -5,23 +7,25 @@ services:
       - postgres
     ports:
       - "80:8000"
-    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     environment:
-      DATABASE_HOSTNAME: { $DATABASE_HOSTNAME }
-      DATABASE_PORT: { $DATABASE_PORT }
-      DATABASE_PASSWORD: { $DATABASE_PASSWORD }
-      DATABASE_NAME: { $DATABASE_NAME }
-      DATABASE_USERNAME: { $DATABASE_USERNAME }
-      SECRET_KEY: { $SECRET_KEY }
-      ALGORITHM: { $ALGORITHM }
-      ACCESS_TOKEN_EXPIRE_MINUTES: { $ACCESS_TOKEN_EXPIRE_MINUTES }
-      DATABASE_URL: "postgresql://{$DATABASE_USERNAME}:{$DATABASE_PASSWORD}@{$DATABASE_HOSTNAME}:{$DATABASE_PORT}/{$DATABASE_NAME}"
+      DATABASE_HOSTNAME: $DATABASE_HOSTNAME
+      DATABASE_PORT: $DATABASE_PORT
+      DATABASE_PASSWORD: $DATABASE_PASSWORD
+      DATABASE_NAME: $DATABASE_NAME
+      DATABASE_USERNAME: $DATABASE_USERNAME
+      SECRET_KEY: $SECRET_KEY
+      ALGORITHM: $ALGORITHM
+      ACCESS_TOKEN_EXPIRE_MINUTES: $ACCESS_TOKEN_EXPIRE_MINUTES
+      DATABASE_URL: "postgresql://$DATABASE_USERNAME:$DATABASE_PASSWORD@$DATABASE_HOSTNAME:$DATABASE_PORT/$DATABASE_NAME"
+    env_file:
+      - .env.prod # Use .env.prod to load sensitive data
 
   postgres:
     image: postgres:13
     environment:
-      POSTGRES_PASSWORD: { $POSTGRES_PASSWORD }
-      POSTGRES_DB: { $POSTGRES_DB }
+      POSTGRES_USER: $DATABASE_USERNAME # Use the same username as the API
+      POSTGRES_PASSWORD: $DATABASE_PASSWORD # Consistent password from .env.prod
+      POSTGRES_DB: $DATABASE_NAME # Database name from .env.prod
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

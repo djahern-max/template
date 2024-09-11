@@ -8,9 +8,8 @@ router = APIRouter(
 
 @router.post("/", response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    # Hash the password before storing it
     hashed_password = utils.hash_password(user.password)
-    db_user = models.User(email=user.email, password=hashed_password)
+    db_user = models.User(username=user.username, password=hashed_password)  
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

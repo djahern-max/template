@@ -2,7 +2,7 @@ import pytest
 from app import models
 
 def test_get_all_posts(client, test_user, test_posts):
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
     
@@ -29,7 +29,7 @@ def test_unauthorized_user_cannot_get_posts(client):
     assert response.json() == {"detail": "Not authenticated"}
 
 def test_get_post_by_id(client, test_user, test_posts):
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -46,15 +46,9 @@ def test_get_post_by_id(client, test_user, test_posts):
     assert post["content"] == test_posts[0].content
     assert post["id"] == test_posts[0].id
 
-
-
 def test_unauthorized_user_cannot_get_non_existent_post(client):
     response = client.get("/posts/8888")  
     assert response.status_code == 404  
-
-
-
-import pytest
 
 @pytest.mark.parametrize("title, content, published", [
     ("Test Post", "This is a test post", True),
@@ -62,7 +56,7 @@ import pytest
 ])
 def test_create_post(client, test_user, title, content, published):
     # Login to get the token
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -89,7 +83,7 @@ def test_create_post(client, test_user, title, content, published):
     print(response.json())
 
 def test_create_post_default_published_true(client, test_user, test_posts):
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -130,7 +124,7 @@ def test_unauthorized_user_cannot_delete_post(client, test_posts):
 
 def test_delete_post(client, test_user, test_posts):
     # Login to get the token
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -149,21 +143,20 @@ def test_delete_post(client, test_user, test_posts):
     response = client.get(f"/posts/{post_id}", headers=headers)
     assert response.status_code == 404
 
-
 def test_user_cannot_delete_another_users_post(client, test_user, test_posts, session):
     # Ensure test_posts are created properly
     assert len(test_posts) > 0, "No posts were created in the fixture"
 
     # Create a second user who will attempt to delete the first user's post
     second_user_data = {
-        "email": "seconduser@example.com",
+        "username": "seconduser",  # Updated
         "password": "password123"
     }
     response = client.post("/users/", json=second_user_data)
     assert response.status_code == 200
 
     # Login with the second user
-    response = client.post("/auth/login", data={"username": second_user_data['email'], "password": second_user_data['password']})
+    response = client.post("/auth/login", data={"username": second_user_data['username'], "password": second_user_data['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -186,7 +179,7 @@ def test_user_cannot_delete_another_users_post(client, test_user, test_posts, se
 
 def test_update_post(client, test_user, test_posts):
     # Login to get the token
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -225,7 +218,7 @@ def test_update_post(client, test_user, test_posts):
 
 def test_update_non_existent_post(client, test_user):
     # Login to get the token
-    response = client.post("/auth/login", data={"username": test_user['email'], "password": test_user['password']})
+    response = client.post("/auth/login", data={"username": test_user['username'], "password": test_user['password']})  # Updated
     assert response.status_code == 200
     token = response.json()["access_token"]
 
@@ -249,4 +242,5 @@ def test_update_non_existent_post(client, test_user):
     # Expecting 404 Not Found
     assert response.status_code == 404
     assert response.json() == {"detail": "Post not found"}
+
 

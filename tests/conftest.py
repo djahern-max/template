@@ -8,10 +8,10 @@ from app.database import get_db
 from dotenv import load_dotenv
 import os
 
-# Load the .env.test file
+
 load_dotenv(dotenv_path=".env.test")
 
-# Dynamically build the SQLALCHEMY_DATABASE_URL from individual components
+
 DATABASE_USERNAME = os.getenv('DATABASE_USERNAME')
 DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
 DATABASE_HOST = os.getenv('DATABASE_HOST')
@@ -20,7 +20,7 @@ DATABASE_NAME = os.getenv('DATABASE_NAME')
 
 SQLALCHEMY_DATABASE_URL = f'postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}'
 
-# Create engine and session
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -34,7 +34,7 @@ def session():
     finally:
         db.close()
 
-# Create client fixture
+
 @pytest.fixture()
 def client(session):
     def override_get_db():
@@ -47,7 +47,7 @@ def client(session):
 
 @pytest.fixture
 def test_user(client):
-    user_data = {"email": "test@gmail.com", "password": "123456"}
+    user_data = {"username": "testuser", "password": "123456"} 
     res = client.post("/users/", json=user_data)
 
     assert res.status_code == 200
@@ -61,20 +61,20 @@ def test_posts(test_user, session):
     posts_data = [{
         "title": "first title",
         "content": "first content",
-        "user_id": test_user['id']  # Use user_id, which matches your Post model
+        "user_id": test_user['id']  
     }, {
         "title": "2nd title",
         "content": "2nd content",
-        "user_id": test_user['id']  # Use user_id
+        "user_id": test_user['id']  
     },
     {
         "title": "3rd title",
         "content": "3rd content",
-        "user_id": test_user['id']  # Use user_id
+        "user_id": test_user['id'] 
     }, {
         "title": "4th title",
         "content": "4th content",
-        "user_id": test_user['id']  # Use user_id
+        "user_id": test_user['id']  
     }]
 
     def create_post_model(post):
@@ -87,3 +87,4 @@ def test_posts(test_user, session):
     session.commit()
 
     return session.query(models.Post).all()
+

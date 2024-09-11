@@ -1,5 +1,5 @@
-from pydantic_settings import BaseSettings  # Import BaseSettings from pydantic-settings
-from pydantic import ConfigDict  # Import ConfigDict from pydantic
+from pydantic_settings import BaseSettings  
+from pydantic import ConfigDict  
 
 class Settings(BaseSettings):
     database_hostname: str
@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     algorithm: str
     access_token_expire_minutes: int
 
-    model_config = ConfigDict(env_file=".env")  # Configuration for the .env file
+    model_config = ConfigDict(env_file=".env")  
 
 settings = Settings()
 
